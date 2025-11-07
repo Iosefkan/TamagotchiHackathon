@@ -1,6 +1,32 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using Serilog;
+using TickerQ.DependencyInjection;
+using Transactions.Extensions;
 
-app.MapGet("/", () => "Hello World!");
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
 
-app.Run();
+try
+{
+    var builder = WebApplication.CreateSlimBuilder(args);
+
+    builder
+        .ConfigureOptions()
+        .ConfigureRabbitMq()
+        .ConfigurePostgre()
+        //.ConfigureScheduler()
+        .ConfigureCache()
+        .ConfigureServices();
+
+    var app = builder.Build();
+    //app.UseTickerQ();
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

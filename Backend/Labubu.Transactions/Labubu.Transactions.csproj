@@ -4,11 +4,34 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>Labubu</RootNamespace>
+        <RootNamespace>Transactions</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.3" />
+      <PackageReference Include="FluentResults" Version="4.0.0" />
+      <PackageReference Include="Flurl.Http" Version="4.0.2" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.3.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+      <PackageReference Include="TickerQ" Version="9.0.0-beta.1" />
+      <PackageReference Include="TickerQ.Dashboard" Version="9.0.0-beta.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Labubu.Shared\Labubu.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Jobs\" />
     </ItemGroup>
 
 </Project>

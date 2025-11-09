@@ -1,0 +1,13 @@
+@use "null";
+@use 'variables';
+@use 'mixins';
+@use 'media' as media;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: variables.$font-family-primary;
+  margin: 0;
+}

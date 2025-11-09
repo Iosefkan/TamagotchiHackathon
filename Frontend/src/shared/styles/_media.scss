@@ -1,0 +1,21 @@
+@use 'sass:map';
+
+$breakpoints: (
+        "xxs": 320px,
+        "xs": 375px,
+        "sm": 576px,
+        "md": 768px,
+        "lg": 992px,
+        "xl": 1200px,
+        "xxl": 1400px
+);
+
+@function bp($key) {
+  @return map.get($breakpoints, $key);
+}
+
+@mixin max($size) {
+  @media (max-width: bp($size)) {
+    @content;
+  }
+}

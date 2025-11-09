@@ -1,4 +1,5 @@
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using Shared.Contracts;
 using Transactions.DAL;
 

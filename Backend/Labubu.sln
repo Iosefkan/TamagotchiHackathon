@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labubu.Auth", "Labubu.Auth\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labubu.Shared", "Labubu.Shared\Labubu.Shared.csproj", "{A9993650-A0F5-4AE4-AA48-42466561DD71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labubu.Common", "Labubu.Common\Labubu.Common.csproj", "{3697044B-C88A-46EC-985C-1C53289CF12C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{A9993650-A0F5-4AE4-AA48-42466561DD71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9993650-A0F5-4AE4-AA48-42466561DD71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9993650-A0F5-4AE4-AA48-42466561DD71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3697044B-C88A-46EC-985C-1C53289CF12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3697044B-C88A-46EC-985C-1C53289CF12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3697044B-C88A-46EC-985C-1C53289CF12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3697044B-C88A-46EC-985C-1C53289CF12C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

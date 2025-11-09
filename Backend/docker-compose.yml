@@ -1,0 +1,258 @@
+version: "3.9"
+
+services:
+  postgres-auth:
+    image: postgres:15
+    container_name: labubu-postgres-auth
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=LabubuAuth
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d LabubuAuth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - labubu-network
+
+  postgres-transactions:
+    image: postgres:15
+    container_name: labubu-postgres-transactions
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=Transactions
+    volumes:
+      - postgres_transactions_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d Transactions"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - labubu-network
+
+  postgres-main:
+    image: postgres:15
+    container_name: labubu-postgres-main
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=LabubuMain
+    volumes:
+      - postgres_main_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d LabubuMain"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - labubu-network
+
+  rabbitmq:
+    image: rabbitmq:3.9.7-management-alpine
+    container_name: labubu-rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_VHOST=/
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - labubu-network
+
+  redis-cache-main:
+    image: redis:7.2-alpine
+    container_name: labubu-redis-cache-main
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_cache_main_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+    networks:
+      - labubu-network
+
+  redis-cache-transactions:
+    image: redis:7.2-alpine
+    container_name: labubu-redis-cache-transactions
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_cache_transactions_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+    networks:
+      - labubu-network
+
+  redis-blacklist:
+    image: redis:7.2-alpine
+    container_name: labubu-redis-blacklist
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_blacklist_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+    networks:
+      - labubu-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: labubu-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    networks:
+      - labubu-network
+
+  auth-api:
+    build:
+      context: .
+      dockerfile: Labubu.Auth/Dockerfile
+    container_name: labubu-auth-api
+    ports:
+      - "5191:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-auth;Port=5432;Username=user;Password=password;Database=LabubuAuth
+      - ConnectionStrings__RedisBlacklist=redis-blacklist:6379
+      - Rabbit__Host=rabbitmq
+      - Rabbit__Port=5672
+      - Rabbit__User=user
+      - Rabbit__Pass=password
+      - Rabbit__VHost=/
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-blacklist:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - labubu-network
+
+  main-api:
+    build:
+      context: .
+      dockerfile: Labubu.Main/Dockerfile
+    container_name: labubu-main-api
+    ports:
+      - "5138:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-main;Port=5432;Username=user;Password=password;Database=LabubuMain
+      - ConnectionStrings__RedisCache=redis-cache-main:6379
+      - ConnectionStrings__RedisBlacklist=redis-blacklist:6379
+      - Rabbit__Host=rabbitmq
+      - Rabbit__Port=5672
+      - Rabbit__User=user
+      - Rabbit__Pass=password
+      - Rabbit__VHost=/
+      - Minio__Endpoint=minio:9000
+      - Minio__AccessKey=minioadmin
+      - Minio__SecretKey=minioadmin
+      - Minio__BucketName=labubu-clothes
+      - Minio__UseSSL=false
+    depends_on:
+      postgres-main:
+        condition: service_healthy
+      redis-cache-main:
+        condition: service_healthy
+      redis-blacklist:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - labubu-network
+
+  transactions-api:
+    build:
+      context: .
+      dockerfile: Labubu.Transactions/Dockerfile
+    container_name: labubu-transactions-api
+    ports:
+      - "5140:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-transactions;Port=5432;Username=user;Password=password;Database=Transactions
+      - ConnectionStrings__RedisConnection=redis-cache-transactions:6379
+      - Rabbit__Host=rabbitmq
+      - Rabbit__Port=5672
+      - Rabbit__User=user
+      - Rabbit__Pass=password
+      - Rabbit__VHost=/
+    depends_on:
+      postgres-transactions:
+        condition: service_healthy
+      redis-cache-transactions:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - labubu-network
+
+volumes:
+  postgres_auth_data:
+  postgres_transactions_data:
+  postgres_main_data:
+  rabbitmq_data:
+  redis_cache_main_data:
+  redis_cache_transactions_data:
+  redis_blacklist_data:
+  minio_data:
+
+networks:
+  labubu-network:
+    driver: bridge

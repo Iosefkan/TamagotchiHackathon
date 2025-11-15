@@ -15,8 +15,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - labubu-network
 
   rabbitmq:
     image: rabbitmq:3.9.7-management-alpine
@@ -36,8 +34,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - labubu-network
 
   redis:
     image: redis:7.2-alpine
@@ -53,8 +49,6 @@ services:
       timeout: 5s
       retries: 5
     command: redis-server --appendonly yes
-    networks:
-      - labubu-network
 
   minio:
     image: minio/minio:latest
@@ -69,8 +63,6 @@ services:
       - minio_data:/data
     restart: unless-stopped
     command: server /data --console-address ":9001"
-    networks:
-      - labubu-network
 
 
   auth-api:
@@ -100,8 +92,6 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - labubu-network
 
   main-api:
     build:
@@ -135,8 +125,6 @@ services:
       minio:
         condition: service_started
     restart: unless-stopped
-    networks:
-      - labubu-network
 
   transactions-api:
     build:
@@ -163,8 +151,6 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - labubu-network
 
   frontend:
     build:
@@ -175,8 +161,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NUXT_PUBLIC_API_BASE=http://main-api:8080
-      - NUXT_PUBLIC_AUTH_API_BASE=http://auth-api:8080
+      - NUXT_PUBLIC_API_BASE=http://localhost:5138
+      - NUXT_PUBLIC_AUTH_API_BASE=http://localhost:5191
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3000
     depends_on:
@@ -185,8 +171,6 @@ services:
       auth-api:
         condition: service_started
     restart: unless-stopped
-    networks:
-      - labubu-network
 
 volumes:
   postgres_data:
@@ -194,7 +178,3 @@ volumes:
   redis_data:
   minio_data:
   auth_dataprotection_keys:
-
-networks:
-  labubu-network:
-    driver: bridge

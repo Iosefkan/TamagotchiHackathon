@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Labubu.Main.Migrations
 {
     /// <inheritdoc />
-    public partial class BattlePass : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,25 @@ namespace Labubu.Main.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Achievements", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BattlePasses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    MaxLevel = table.Column<int>(type: "integer", nullable: false),
+                    XpPerLevel = table.Column<int>(type: "integer", nullable: false),
+                    PurchasePrice = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BattlePasses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,6 +83,35 @@ namespace Labubu.Main.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BattlePassRewards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BattlePassId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    IsPremium = table.Column<bool>(type: "boolean", nullable: false),
+                    ClothesId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CurrencyAmount = table.Column<int>(type: "integer", nullable: true),
+                    CurrencyType = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BattlePassRewards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BattlePassRewards_BattlePasses_BattlePassId",
+                        column: x => x.BattlePassId,
+                        principalTable: "BattlePasses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BattlePassRewards_Clothes_ClothesId",
+                        column: x => x.ClothesId,
+                        principalTable: "Clothes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -112,6 +160,87 @@ namespace Labubu.Main.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AchievementProgresses_Labubus_LabubuId",
+                        column: x => x.LabubuId,
+                        principalTable: "Labubus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BattlePassProgresses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BattlePassId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LabubuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CurrentLevel = table.Column<int>(type: "integer", nullable: false),
+                    CurrentXp = table.Column<int>(type: "integer", nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BattlePassProgresses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BattlePassProgresses_BattlePasses_BattlePassId",
+                        column: x => x.BattlePassId,
+                        principalTable: "BattlePasses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BattlePassProgresses_Labubus_LabubuId",
+                        column: x => x.LabubuId,
+                        principalTable: "Labubus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BattlePassPurchases",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BattlePassId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LabubuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchasedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PricePaid = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BattlePassPurchases", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BattlePassPurchases_BattlePasses_BattlePassId",
+                        column: x => x.BattlePassId,
+                        principalTable: "BattlePasses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BattlePassPurchases_Labubus_LabubuId",
+                        column: x => x.LabubuId,
+                        principalTable: "Labubus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BattlePassRewardClaims",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BattlePassRewardId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LabubuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClaimedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BattlePassRewardClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BattlePassRewardClaims_BattlePassRewards_BattlePassRewardId",
+                        column: x => x.BattlePassRewardId,
+                        principalTable: "BattlePassRewards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BattlePassRewardClaims_Labubus_LabubuId",
                         column: x => x.LabubuId,
                         principalTable: "Labubus",
                         principalColumn: "Id",
@@ -183,6 +312,49 @@ namespace Labubu.Main.Migrations
                 column: "LabubuId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BattlePassProgresses_BattlePassId_LabubuId",
+                table: "BattlePassProgresses",
+                columns: new[] { "BattlePassId", "LabubuId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassProgresses_LabubuId",
+                table: "BattlePassProgresses",
+                column: "LabubuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassPurchases_BattlePassId_LabubuId",
+                table: "BattlePassPurchases",
+                columns: new[] { "BattlePassId", "LabubuId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassPurchases_LabubuId",
+                table: "BattlePassPurchases",
+                column: "LabubuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassRewardClaims_BattlePassRewardId_LabubuId",
+                table: "BattlePassRewardClaims",
+                columns: new[] { "BattlePassRewardId", "LabubuId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassRewardClaims_LabubuId",
+                table: "BattlePassRewardClaims",
+                column: "LabubuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassRewards_BattlePassId",
+                table: "BattlePassRewards",
+                column: "BattlePassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BattlePassRewards_ClothesId",
+                table: "BattlePassRewards",
+                column: "ClothesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GameSessions_GameId",
                 table: "GameSessions",
                 column: "GameId");
@@ -211,6 +383,15 @@ namespace Labubu.Main.Migrations
                 name: "AchievementProgresses");
 
             migrationBuilder.DropTable(
+                name: "BattlePassProgresses");
+
+            migrationBuilder.DropTable(
+                name: "BattlePassPurchases");
+
+            migrationBuilder.DropTable(
+                name: "BattlePassRewardClaims");
+
+            migrationBuilder.DropTable(
                 name: "GameSessions");
 
             migrationBuilder.DropTable(
@@ -220,13 +401,19 @@ namespace Labubu.Main.Migrations
                 name: "Achievements");
 
             migrationBuilder.DropTable(
+                name: "BattlePassRewards");
+
+            migrationBuilder.DropTable(
                 name: "Games");
 
             migrationBuilder.DropTable(
-                name: "Clothes");
+                name: "Labubus");
 
             migrationBuilder.DropTable(
-                name: "Labubus");
+                name: "BattlePasses");
+
+            migrationBuilder.DropTable(
+                name: "Clothes");
 
             migrationBuilder.DropTable(
                 name: "Users");

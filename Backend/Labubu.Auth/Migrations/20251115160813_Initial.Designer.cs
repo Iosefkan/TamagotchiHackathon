@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Labubu.Auth.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20251109111525_Initial")]
+    [Migration("20251115160813_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

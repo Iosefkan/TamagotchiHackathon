@@ -73,6 +73,160 @@ namespace Labubu.Main.Migrations
                     b.ToTable("AchievementProgresses");
                 });
 
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePass", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("XpPerLevel")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BattlePasses");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BattlePassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentXp")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("LabubuId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LabubuId");
+
+                    b.HasIndex("BattlePassId", "LabubuId")
+                        .IsUnique();
+
+                    b.ToTable("BattlePassProgresses");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BattlePassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("LabubuId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("PricePaid")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LabubuId");
+
+                    b.HasIndex("BattlePassId", "LabubuId")
+                        .IsUnique();
+
+                    b.ToTable("BattlePassPurchases");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassReward", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BattlePassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ClothesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("CurrencyAmount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CurrencyType")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BattlePassId");
+
+                    b.HasIndex("ClothesId");
+
+                    b.ToTable("BattlePassRewards");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassRewardClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BattlePassRewardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LabubuId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LabubuId");
+
+                    b.HasIndex("BattlePassRewardId", "LabubuId")
+                        .IsUnique();
+
+                    b.ToTable("BattlePassRewardClaims");
+                });
+
             modelBuilder.Entity("Labubu.Main.DAL.Clothes", b =>
                 {
                     b.Property<Guid>("Id")
@@ -241,6 +395,81 @@ namespace Labubu.Main.Migrations
                     b.Navigation("Labubu");
                 });
 
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassProgress", b =>
+                {
+                    b.HasOne("Labubu.Main.DAL.BattlePass", "BattlePass")
+                        .WithMany("Progresses")
+                        .HasForeignKey("BattlePassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Labubu.Main.DAL.Labubu", "Labubu")
+                        .WithMany("BattlePassProgresses")
+                        .HasForeignKey("LabubuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BattlePass");
+
+                    b.Navigation("Labubu");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassPurchase", b =>
+                {
+                    b.HasOne("Labubu.Main.DAL.BattlePass", "BattlePass")
+                        .WithMany("Purchases")
+                        .HasForeignKey("BattlePassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Labubu.Main.DAL.Labubu", "Labubu")
+                        .WithMany("BattlePassPurchases")
+                        .HasForeignKey("LabubuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BattlePass");
+
+                    b.Navigation("Labubu");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassReward", b =>
+                {
+                    b.HasOne("Labubu.Main.DAL.BattlePass", "BattlePass")
+                        .WithMany("Rewards")
+                        .HasForeignKey("BattlePassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Labubu.Main.DAL.Clothes", "Clothes")
+                        .WithMany()
+                        .HasForeignKey("ClothesId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("BattlePass");
+
+                    b.Navigation("Clothes");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassRewardClaim", b =>
+                {
+                    b.HasOne("Labubu.Main.DAL.BattlePassReward", "BattlePassReward")
+                        .WithMany("Claims")
+                        .HasForeignKey("BattlePassRewardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Labubu.Main.DAL.Labubu", "Labubu")
+                        .WithMany("BattlePassRewardClaims")
+                        .HasForeignKey("LabubuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BattlePassReward");
+
+                    b.Navigation("Labubu");
+                });
+
             modelBuilder.Entity("Labubu.Main.DAL.GameSession", b =>
                 {
                     b.HasOne("Labubu.Main.DAL.Game", "Game")
@@ -295,6 +524,20 @@ namespace Labubu.Main.Migrations
                     b.Navigation("AchievementProgresses");
                 });
 
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePass", b =>
+                {
+                    b.Navigation("Progresses");
+
+                    b.Navigation("Purchases");
+
+                    b.Navigation("Rewards");
+                });
+
+            modelBuilder.Entity("Labubu.Main.DAL.BattlePassReward", b =>
+                {
+                    b.Navigation("Claims");
+                });
+
             modelBuilder.Entity("Labubu.Main.DAL.Game", b =>
                 {
                     b.Navigation("GameSessions");
@@ -303,6 +546,12 @@ namespace Labubu.Main.Migrations
             modelBuilder.Entity("Labubu.Main.DAL.Labubu", b =>
                 {
                     b.Navigation("AchievementProgresses");
+
+                    b.Navigation("BattlePassProgresses");
+
+                    b.Navigation("BattlePassPurchases");
+
+                    b.Navigation("BattlePassRewardClaims");
 
                     b.Navigation("GameSessions");
 

@@ -96,7 +96,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-//builder.Services.AddHostedService<Migrator<AuthDbContext>>();
+builder.Services.AddHostedService<Migrator<AuthDbContext>>();
 
 var app = builder.Build();
 

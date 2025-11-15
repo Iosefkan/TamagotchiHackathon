@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { toRef } from 'vue'
 import type { Transactions } from '@/modules/transactions/domain/Transaction'
 import TransactionCard from '@/modules/transactions/ui/TransactionCard/TransactionCard.vue'
 import { useTransactionList } from '@/modules/transactions/ui/TransactionList/useCases'
@@ -9,8 +10,9 @@ interface TransactionListProps {
 }
 
 const props = defineProps<TransactionListProps>()
+const transactionsRef = toRef(props, 'transactions')
 
-const { groupedTransactions } = useTransactionList(props.transactions)
+const { groupedTransactions } = useTransactionList(transactionsRef)
 </script>
 
 <template>

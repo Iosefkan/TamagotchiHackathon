@@ -1,23 +1,33 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Caching.Distributed;
 
 namespace Common.Services;
 
 public class TokenBlacklistService : ITokenBlacklistService
 {
-    private readonly IDatabase _database;
+    private const string CachePrefix = "jwt:blacklist:";
+    private readonly IDistributedCache _cache;
 
-    public TokenBlacklistService(IConnectionMultiplexer redis)
+    public TokenBlacklistService(IDistributedCache cache)
     {
-        _database = redis.GetDatabase();
+        _cache = cache;
     }
 
     public async Task BlacklistTokenAsync(string jti, TimeSpan expiration)
     {
-        await _database.StringSetAsync(jti.ToString(), "blacklisted", expiration);
+        await _cache.SetStringAsync(
+            BuildCacheKey(jti),
+            "blacklisted",
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiration
+            });
     }
 
     public async Task<bool> IsTokenBlacklistedAsync(string jti)
     {
-        return await _database.KeyExistsAsync(jti.ToString());
+        var value = await _cache.GetStringAsync(BuildCacheKey(jti));
+        return value is not null;
     }
+
+    private static string BuildCacheKey(string jti) => $"{CachePrefix}{jti}";
 }

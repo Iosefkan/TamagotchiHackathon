@@ -1,19 +1,35 @@
 <script lang="ts" setup>
-import { LockOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { useAuthFormRegistration } from '~/modules/auth/ui/AuthForm/useCases'
 
-const { formState, confirmPasswordRule, onFinish, onFinishFailed, disabled } = useAuthFormRegistration()
+const {
+  formState,
+  confirmPasswordRule,
+  onFinish,
+  onFinishFailed,
+  disabled,
+  loading,
+  errorMessage,
+} = useAuthFormRegistration()
 </script>
 
 <template>
   <AForm
     class="auth-form-registration"
     :model="formState"
-    name="login"
+    name="register"
     layout="vertical"
     @finish="onFinish"
     @finishFailed="onFinishFailed"
   >
+    <AAlert
+      v-if="errorMessage"
+      type="error"
+      :message="errorMessage"
+      show-icon
+      class="auth-form-registration__error"
+    />
+
     <div class="auth-form-registration__fields">
       <AFormItem
         name="username"
@@ -22,6 +38,20 @@ const { formState, confirmPasswordRule, onFinish, onFinishFailed, disabled } = u
         <AInput v-model:value="formState.username" placeholder="Имя пользователя">
           <template #prefix>
             <UserOutlined class="site-form-item-icon" />
+          </template>
+        </AInput>
+      </AFormItem>
+
+      <AFormItem
+        name="email"
+        :rules="[
+          { required: true, message: 'Пожалуйста, введите email!' },
+          { type: 'email', message: 'Введите корректный email!' },
+        ]"
+      >
+        <AInput v-model:value="formState.email" placeholder="Email">
+          <template #prefix>
+            <MailOutlined class="site-form-item-icon" />
           </template>
         </AInput>
       </AFormItem>
@@ -47,9 +77,9 @@ const { formState, confirmPasswordRule, onFinish, onFinishFailed, disabled } = u
     </div>
 
     <AFormItem class="auth-form-registration__submit">
-      <AButton :disabled="disabled" type="primary" html-type="submit" block
-        >Зарегистрироваться</AButton
-      >
+      <AButton :disabled="disabled" :loading="loading" type="primary" html-type="submit" block>
+        Зарегистрироваться
+      </AButton>
     </AFormItem>
   </AForm>
 </template>
@@ -62,6 +92,10 @@ const { formState, confirmPasswordRule, onFinish, onFinishFailed, disabled } = u
 
   .ant-form-item {
     margin: 0;
+  }
+
+  &__error {
+    margin-bottom: 10px;
   }
 
   &__fields {

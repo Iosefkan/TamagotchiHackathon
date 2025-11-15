@@ -1,12 +1,17 @@
+import { ref, watch, toValue, type MaybeRef } from 'vue'
 import { groupTransactions, sortGroups, sortTransactions } from '../utils'
 import type { Transactions } from '@/modules/transactions/domain/Transaction'
 import type { TransactionGroup } from '@/modules/transactions/ui/TransactionList/types'
 
-export const useTransactionList = (transactions: Transactions) => {
+export const useTransactionList = (transactionsSource: MaybeRef<Transactions>) => {
   const groupedTransactions = ref<TransactionGroup[]>([])
 
   const groupAndSort = () => {
-    if (!transactions || !transactions.length) return
+    const transactions = toValue(transactionsSource) ?? []
+    if (!transactions.length) {
+      groupedTransactions.value = []
+      return
+    }
 
     const groups = groupTransactions(transactions)
 
@@ -21,15 +26,17 @@ export const useTransactionList = (transactions: Transactions) => {
       date: key,
       transactions: groups[key],
     })) as TransactionGroup[]
-
-    console.log(groupedTransactions)
   }
 
   groupAndSort()
 
-  watch(transactions, () => {
-    groupAndSort()
-  }, { deep: true })
+  watch(
+    () => toValue(transactionsSource),
+    () => {
+      groupAndSort()
+    },
+    { deep: true },
+  )
 
   return { groupedTransactions }
 }

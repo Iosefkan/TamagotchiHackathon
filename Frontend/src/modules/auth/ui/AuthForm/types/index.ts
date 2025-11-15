@@ -5,8 +5,9 @@ export interface AuthFormStateLogin {
 
 export interface AuthFormStateRegistration {
   username: string
+  email: string
   password: string
-  confirmPassword: string,
+  confirmPassword: string
 }
 
 export enum AuthFormType {

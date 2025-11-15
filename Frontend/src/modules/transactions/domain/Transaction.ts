@@ -11,7 +11,7 @@ export enum TransactionStatus {
 
 export interface Transaction {
   uuid: string
-  bank_id: string
+  bankId: string
   name: string
   category: string
   type: TransactionType

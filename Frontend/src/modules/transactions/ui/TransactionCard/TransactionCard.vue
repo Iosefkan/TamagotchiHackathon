@@ -13,7 +13,7 @@ defineProps<TransactionCardProps>()
 
 <template>
   <div class="transaction-card">
-    <BankIcon class="transaction-card__bank" :color="bankColors[transaction.bank_id]" />
+    <BankIcon class="transaction-card__bank" :color="bankColors[transaction.bankId]" />
     <div class="transaction-card__content">
       <div class="transaction-card__name">{{ transaction.name }}</div>
       <div class="transaction-card__category">{{ transaction.category }}</div>

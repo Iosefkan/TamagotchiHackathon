@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { PlusOutlined } from '@ant-design/icons-vue'
 import BankCard from '@/modules/banks/ui/BankCard/BankCard.vue'
-import { BANKS_MOCK } from '@/shared/mocks/banks'
+import { useFinanceSummary } from '@/modules/dashboard/useFinanceSummary'
+
+const { banks } = useFinanceSummary()
 </script>
 
 <template>
   <div class="bank-list">
-    <BankCard v-for="bank in BANKS_MOCK.banks" :key="bank.id" :bank="bank" />
+    <BankCard v-for="bank in banks" :key="bank.id" :bank="bank" />
     <div class="bank-list__add">
       <PlusOutlined class="bank-list__add-icon" />
     </div>

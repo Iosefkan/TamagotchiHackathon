@@ -1,8 +1,17 @@
+import { defineNuxtConfig } from 'nuxt/config'
+import process from 'node:process'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: false,
   devtools: { enabled: true },
   srcDir: 'src/',
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:5138',
+      authApiBase: process.env.NUXT_PUBLIC_AUTH_API_BASE ?? 'http://localhost:5191',
+    },
+  },
   modules: [
     '@nuxt/eslint',
     '@nuxt/fonts',

@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using StackExchange.Redis;
 using System.IO;
 using System.Text;
 using Common.Extensions;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,8 +65,10 @@ builder.Services.AddMassTransit(massTransitConfig =>
 var redisBlacklistConnection = builder.Configuration.GetConnectionString("RedisBlacklist");
 if (!string.IsNullOrEmpty(redisBlacklistConnection))
 {
-    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-        ConnectionMultiplexer.Connect(redisBlacklistConnection));
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisBlacklistConnection;
+    });
 }
 
 builder.Services.AddScoped<IJwtService, JwtService>();

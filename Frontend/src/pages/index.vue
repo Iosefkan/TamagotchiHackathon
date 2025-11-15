@@ -2,18 +2,27 @@
 import Tamagotchi from '~/modules/tamagotchi/ui/Tamagotchi/Tamagotchi.vue'
 import Balance from '@/modules/transactions/ui/Balance/Balance.vue'
 import UiHeader from '@/shared/ui/UiHeader/UiHeader.vue'
-import { USER_MOCK } from '@/shared/mocks/user'
 import BankList from '@/modules/banks/ui/BankList/BankList.vue'
 import Transactions from '@/modules/transactions/ui/Transactions/Transactions.vue'
+import { useFinanceSummary } from '@/modules/dashboard/useFinanceSummary'
+import type { User } from '@/modules/user/domain'
 
 definePageMeta({
   layout: 'colorful',
 })
+
+const { user } = useFinanceSummary()
+
+const headerUser = computed<User>(() => ({
+  id: user.value?.id ?? 'placeholder-user',
+  name: user.value?.name ?? 'Labubu',
+  picture: user.value?.picture ?? null,
+}))
 </script>
 
 <template>
   <div class="index-page">
-    <UiHeader :user="USER_MOCK.user" />
+    <UiHeader :user="headerUser" />
     <div class="index-page__tamagotchi">
       <Tamagotchi class="index-page__tamagotchi-character" />
     </div>

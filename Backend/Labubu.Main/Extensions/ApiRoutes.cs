@@ -23,6 +23,13 @@ public static class ApiRoutes
         public const string Energy = $"{Base}/energy";
     }
     
+    public static class Finance
+    {
+        private const string Base = $"{ApiBase}/finance";
+
+        public const string Summary = $"{Base}/summary";
+    }
+    
     public static class Clothes
     {
         private const string Base = $"{ApiBase}/clothes";

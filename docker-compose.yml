@@ -1,55 +1,14 @@
 services:
-  postgres-auth:
+  postgres:
     image: postgres:15
-    container_name: labubu-postgres-auth
+    container_name: labubu-postgres
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=LabubuAuth
     volumes:
-      - postgres_auth_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - labubu-network
-
-  postgres-transactions:
-    image: postgres:15
-    container_name: labubu-postgres-transactions
-    ports:
-      - "5434:5432"
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=Transactions
-    volumes:
-      - postgres_transactions_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - labubu-network
-
-  postgres-main:
-    image: postgres:15
-    container_name: labubu-postgres-main
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=LabubuMain
-    volumes:
-      - postgres_main_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
@@ -80,47 +39,13 @@ services:
     networks:
       - labubu-network
 
-  redis-cache-main:
+  redis:
     image: redis:7.2-alpine
-    container_name: labubu-redis-cache-main
+    container_name: labubu-redis
     ports:
       - "6379:6379"
     volumes:
-      - redis_cache_main_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    command: redis-server --appendonly yes
-    networks:
-      - labubu-network
-
-  redis-cache-transactions:
-    image: redis:7.2-alpine
-    container_name: labubu-redis-cache-transactions
-    ports:
-      - "6381:6379"
-    volumes:
-      - redis_cache_transactions_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    command: redis-server --appendonly yes
-    networks:
-      - labubu-network
-
-  redis-blacklist:
-    image: redis:7.2-alpine
-    container_name: labubu-redis-blacklist
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_blacklist_data:/data
+      - redis_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -147,74 +72,6 @@ services:
     networks:
       - labubu-network
 
-  auth-migrations:
-    build:
-      context: ./Backend
-      dockerfile: Labubu.Auth/Dockerfile
-      target: build
-    container_name: labubu-auth-migrations
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres-auth;Port=5432;Username=user;Password=password;Database=LabubuAuth
-    command: >
-      sh -c "
-        dotnet tool install --global dotnet-ef --version 9.0.10 || true &&
-        export PATH=\"$PATH:/root/.dotnet/tools\" &&
-        cd /src/Labubu.Auth &&
-        dotnet ef database update --context AuthDbContext --connection \"Host=postgres-auth;Port=5432;Username=user;Password=password;Database=LabubuAuth\"
-      "
-    depends_on:
-      postgres-auth:
-        condition: service_healthy
-    restart: "no"
-    networks:
-      - labubu-network
-
-  main-migrations:
-    build:
-      context: ./Backend
-      dockerfile: Labubu.Main/Dockerfile
-      target: build
-    container_name: labubu-main-migrations
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres-main;Port=5432;Username=user;Password=password;Database=LabubuMain
-    command: >
-      sh -c "
-        dotnet tool install --global dotnet-ef --version 9.0.10 || true &&
-        export PATH=\"$PATH:/root/.dotnet/tools\" &&
-        cd /src/Labubu.Main &&
-        dotnet ef database update --context MainContext --connection \"Host=postgres-main;Port=5432;Username=user;Password=password;Database=LabubuMain\"
-      "
-    depends_on:
-      postgres-main:
-        condition: service_healthy
-    restart: "no"
-    networks:
-      - labubu-network
-
-  transactions-migrations:
-    build:
-      context: ./Backend
-      dockerfile: Labubu.Transactions/Dockerfile
-      target: build
-    container_name: labubu-transactions-migrations
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres-transactions;Port=5432;Username=user;Password=password;Database=Transactions
-    command: >
-      sh -c "
-        dotnet tool install --global dotnet-ef --version 9.0.10 || true &&
-        export PATH=\"$PATH:/root/.dotnet/tools\" &&
-        cd /src/Labubu.Transactions &&
-        dotnet ef database update --context TransactionsDataContext --connection \"Host=postgres-transactions;Port=5432;Username=user;Password=password;Database=Transactions\"
-      "
-    depends_on:
-      postgres-transactions:
-        condition: service_healthy
-    restart: "no"
-    networks:
-      - labubu-network
 
   auth-api:
     build:
@@ -226,8 +83,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=postgres-auth;Port=5432;Username=user;Password=password;Database=LabubuAuth
-      - ConnectionStrings__RedisBlacklist=redis-blacklist:6379
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Username=user;Password=password;Database=LabubuAuth
+      - ConnectionStrings__RedisBlacklist=redis:6379
       - Rabbit__Host=rabbitmq
       - Rabbit__Port=5672
       - Rabbit__User=user
@@ -236,14 +93,12 @@ services:
     volumes:
       - auth_dataprotection_keys:/app/data-protection-keys
     depends_on:
-      postgres-auth:
+      postgres:
         condition: service_healthy
-      redis-blacklist:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      auth-migrations:
-        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - labubu-network
@@ -258,9 +113,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=postgres-main;Port=5432;Username=user;Password=password;Database=LabubuMain
-      - ConnectionStrings__RedisCache=redis-cache-main:6379
-      - ConnectionStrings__RedisBlacklist=redis-blacklist:6379
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Username=user;Password=password;Database=LabubuMain
+      - ConnectionStrings__RedisCache=redis:6379
       - Rabbit__Host=rabbitmq
       - Rabbit__Port=5672
       - Rabbit__User=user
@@ -272,18 +126,14 @@ services:
       - Minio__BucketName=labubu-clothes
       - Minio__UseSSL=false
     depends_on:
-      postgres-main:
+      postgres:
         condition: service_healthy
-      redis-cache-main:
-        condition: service_healthy
-      redis-blacklist:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
       minio:
         condition: service_started
-      main-migrations:
-        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - labubu-network
@@ -298,34 +148,50 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=postgres-transactions;Port=5432;Username=user;Password=password;Database=Transactions
-      - ConnectionStrings__RedisConnection=redis-cache-transactions:6379
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Username=user;Password=password;Database=Transactions
+      - ConnectionStrings__RedisConnection=redis:6379
       - Rabbit__Host=rabbitmq
       - Rabbit__Port=5672
       - Rabbit__User=user
       - Rabbit__Pass=password
       - Rabbit__VHost=/
     depends_on:
-      postgres-transactions:
+      postgres:
         condition: service_healthy
-      redis-cache-transactions:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      transactions-migrations:
-        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - labubu-network
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: labubu-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NUXT_PUBLIC_API_BASE=http://main-api:8080
+      - NUXT_PUBLIC_AUTH_API_BASE=http://auth-api:8080
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+    depends_on:
+      main-api:
+        condition: service_started
+      auth-api:
+        condition: service_started
     restart: unless-stopped
     networks:
       - labubu-network
 
 volumes:
-  postgres_auth_data:
-  postgres_transactions_data:
-  postgres_main_data:
+  postgres_data:
   rabbitmq_data:
-  redis_cache_main_data:
-  redis_cache_transactions_data:
-  redis_blacklist_data:
+  redis_data:
   minio_data:
   auth_dataprotection_keys:
 

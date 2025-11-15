@@ -12,7 +12,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 using Shared.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,13 +30,6 @@ if (!string.IsNullOrEmpty(redisCacheConnection))
     {
         options.Configuration = redisCacheConnection;
     });
-}
-
-var redisBlacklistConnection = builder.Configuration.GetConnectionString("RedisBlacklist");
-if (!string.IsNullOrEmpty(redisBlacklistConnection))
-{
-    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-        ConnectionMultiplexer.Connect(redisBlacklistConnection));
 }
 
 builder.Services.Configure<Common.Models.JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -82,6 +74,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessageGenerationService, MessageGenerationService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IFinanceService, FinanceService>();
 
 builder.Services.AddHostedService<MessageBackgroundService>();
 
@@ -170,6 +163,7 @@ GameEnd.Map(app);
 GetUserEnergy.Map(app);
 GetUserInfo.Map(app);
 MarkMessageRead.Map(app);
+GetFinanceSummary.Map(app);
 
 GetActiveBattlePasses.Map(app);
 GetBattlePassInfo.Map(app);

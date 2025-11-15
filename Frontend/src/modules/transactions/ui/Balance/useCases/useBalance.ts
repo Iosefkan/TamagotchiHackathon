@@ -1,10 +1,10 @@
-import { BALANCE_MOCK } from '@/shared/mocks/balance'
 import { formatAmount } from '@/shared/lib/utils'
+import { useFinanceSummary } from '@/modules/dashboard/useFinanceSummary'
 
 export const useBalance = () => {
-  const amount = BALANCE_MOCK.amount
+  const { balance } = useFinanceSummary()
 
   return {
-    formattedAmount: formatAmount(amount),
+    formattedAmount: computed(() => formatAmount(balance.value)),
   }
 }

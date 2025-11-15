@@ -2,7 +2,7 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { useAuthFormLogin } from '~/modules/auth/ui/AuthForm/useCases/useAuthFormLogin'
 
-const { formState, onFinish, onFinishFailed, disabled } = useAuthFormLogin()
+const { formState, onFinish, onFinishFailed, disabled, loading, errorMessage } = useAuthFormLogin()
 </script>
 
 <template>
@@ -14,6 +14,14 @@ const { formState, onFinish, onFinishFailed, disabled } = useAuthFormLogin()
     @finish="onFinish"
     @finishFailed="onFinishFailed"
   >
+    <AAlert
+      v-if="errorMessage"
+      type="error"
+      :message="errorMessage"
+      show-icon
+      class="auth-form-login__error"
+    />
+
     <div class="auth-form-login__fields">
       <AFormItem
         name="username"
@@ -39,7 +47,9 @@ const { formState, onFinish, onFinishFailed, disabled } = useAuthFormLogin()
     </div>
 
     <AFormItem class="auth-form-login__submit">
-      <AButton :disabled="disabled" type="primary" html-type="submit" block>Войти</AButton>
+      <AButton :disabled="disabled" :loading="loading" type="primary" html-type="submit" block>
+        Войти
+      </AButton>
     </AFormItem>
   </AForm>
 </template>
@@ -52,6 +62,10 @@ const { formState, onFinish, onFinishFailed, disabled } = useAuthFormLogin()
 
   .ant-form-item {
     margin: 0;
+  }
+
+  &__error {
+    margin-bottom: 10px;
   }
 
   &__fields {

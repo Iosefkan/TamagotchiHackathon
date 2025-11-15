@@ -1,19 +1,21 @@
 <script lang="ts" setup>
 import { SearchOutlined, BellFilled } from '@ant-design/icons-vue'
-
 import type { User } from '@/modules/user/domain'
+import UserPictureImage from '@/shared/images/user_pic.webp'
 
 interface UiHeaderProps {
   user: User
 }
 
-defineProps<UiHeaderProps>()
+const props = defineProps<UiHeaderProps>()
+
+const picture = computed(() => props.user.picture ?? UserPictureImage)
 </script>
 
 <template>
   <div class="ui-header">
     <div class="ui-header__user">
-      <img :src="user.picture" alt="" />
+      <img :src="picture" alt="" />
     </div>
     <div class="ui-header__actions">
       <div class="ui-header__actions-item"><SearchOutlined /></div>

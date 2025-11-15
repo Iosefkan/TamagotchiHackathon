@@ -1,10 +1,7 @@
-import type { Transactions } from '@/modules/transactions/domain/Transaction'
-import { TRANSACTIONS_MOCK } from '@/shared/mocks/transactions'
+import { useFinanceSummary } from '@/modules/dashboard/useFinanceSummary'
 
 export const useTransactions = () => {
-  const transactions = ref<Transactions>([])
-
-  transactions.value = TRANSACTIONS_MOCK.transactions
+  const { transactions } = useFinanceSummary()
 
   return {
     transactions,

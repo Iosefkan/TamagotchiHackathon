@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { SearchOutlined, BellFilled } from '@ant-design/icons-vue'
 import type { User } from '@/modules/user/domain'
 import UserPictureImage from '@/shared/images/user_pic.webp'
+import { useTamagotchiSignals } from '@/modules/tamagotchi/useTamagotchiSignals'
 
 interface UiHeaderProps {
   user: User
@@ -10,6 +12,7 @@ interface UiHeaderProps {
 const props = defineProps<UiHeaderProps>()
 
 const picture = computed(() => props.user.picture ?? UserPictureImage)
+const { headerBadges } = useTamagotchiSignals()
 </script>
 
 <template>
@@ -18,8 +21,14 @@ const picture = computed(() => props.user.picture ?? UserPictureImage)
       <img :src="picture" alt="" />
     </div>
     <div class="ui-header__actions">
-      <div class="ui-header__actions-item"><SearchOutlined /></div>
-      <div class="ui-header__actions-item"><BellFilled /></div>
+      <div class="ui-header__actions-item">
+        <SearchOutlined />
+        <span v-if="headerBadges.merch" class="ui-header__badge">{{ headerBadges.merch }}</span>
+      </div>
+      <div class="ui-header__actions-item">
+        <BellFilled />
+        <span v-if="headerBadges.achievements" class="ui-header__badge">{{ headerBadges.achievements }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -55,9 +64,26 @@ const picture = computed(() => props.user.picture ?? UserPictureImage)
     color: variables.$white;
 
     &-item {
+      position: relative;
       font-size: 20px;
       cursor: pointer;
     }
+  }
+
+  &__badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: variables.$white;
+    color: variables.$black;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
   }
 }
 </style>

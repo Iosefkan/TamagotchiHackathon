@@ -36,7 +36,7 @@ public class FinanceService : IFinanceService
             return Result.Fail("User not found");
         }
 
-        var toDate = DateTimeOffset.UtcNow;
+        var toDate = DateTimeOffset.UtcNow.Date;
         var fromDate = toDate.AddMonths(-1);
 
         var statisticsResult = await _transactionService.GetUserStatisticsAsync(
